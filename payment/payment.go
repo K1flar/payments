@@ -1,23 +1,18 @@
 package payment
 
-import (
-	"fmt"
-
-	"github.com/google/uuid"
-)
+import "errors"
 
 type Order struct {
-	ID     string
 	Amount int
 	Status string
 }
 
 func NewOrder(amount int) *Order {
-	return &Order{ID: uuid.NewString(), Amount: amount, Status: "created"}
+	return &Order{Amount: amount, Status: "created"}
 }
 
-func (o Order) IsValid() bool {
-	return o.Amount > 0
+func (o *Order) IsValid() bool {
+	return o.Amount >= 0
 }
 
 type PaymentService struct{}
@@ -27,12 +22,20 @@ func NewPaymentService() *PaymentService {
 }
 
 func (ps *PaymentService) ProcessPayment(order *Order) error {
-	if !order.IsValid() {
-		return fmt.Errorf("invalid order")
-	}
 	if order.Status == "paid" {
-		return fmt.Errorf("order is already paid")
+		return errors.New("order is already paid")
 	}
+
+	if !order.IsValid() {
+		order.Status = "payment_failed"
+		return errors.New("error")
+	}
+
+	if order.Amount == 0 {
+		order.Status = "confirmed"
+		return nil
+	}
+
 	order.Status = "paid"
 	return nil
 }

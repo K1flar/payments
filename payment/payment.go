@@ -46,6 +46,9 @@ func (ps *PaymentService) CancelOrder(order *Order) error {
 	if order.Status == "paid" {
 		return errors.New("cannot cancel paid order")
 	}
+	if order.Status == "cancelled" {
+		return errors.New("order already cancelled")
+	}
 	order.Status = "cancelled"
 	return nil
 }

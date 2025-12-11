@@ -1,6 +1,8 @@
 package payment
 
-import "errors"
+import (
+	"errors"
+)
 
 type Order struct {
 	Amount int
@@ -37,5 +39,13 @@ func (ps *PaymentService) ProcessPayment(order *Order) error {
 	}
 
 	order.Status = "paid"
+	return nil
+}
+
+func (ps *PaymentService) CancelOrder(order *Order) error {
+	if order.Status == "paid" {
+		return errors.New("cannot cancel paid order")
+	}
+	order.Status = "cancelled"
 	return nil
 }

@@ -48,3 +48,38 @@ jobs:
     
     - name: Run tests
       run: go test -v ./...
+
+  generate-docs:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.25'
+    
+    - name: Get module name
+      id: module
+      run: echo "MODULE_NAME=$(go list -m)" >> $GITHUB_OUTPUT
+    
+    - name: Generate documentation HTML
+      run: |
+        go install golang.org/x/tools/cmd/godoc@latest
+        
+        mkdir -p docs
+        
+        echo "Generating documentation for module: ${{ steps.module.outputs.MODULE_NAME }}"
+        
+        godoc -http=:8080 &
+        SERVER_PID=$!
+        sleep 5
+        
+        wget --recursive --no-parent \
+             --convert-links --html-extension \
+             --no-host-directories \
+             --directory-prefix=docs \
+             "http://localhost:8080/pkg/${{ steps.module.outputs.MODULE_NAME }}/"
+        
+        kill $SERVER_PID

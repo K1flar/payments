@@ -1,28 +1,40 @@
 package payment
 
-import (
-	"errors"
-)
+import "errors"
 
+// Order представляет заказ в системе оплаты.
+// Содержит информацию о сумме и текущем статусе.
 type Order struct {
-	Amount int
-	Status string
+	Amount int    // Сумма заказа в минимальных единицах валюты
+	Status string // Текущий статус заказа
 }
 
+// NewOrder создает и возвращает новый заказ с указанной суммой.
+// Начальный статус заказа устанавливается в "created".
 func NewOrder(amount int) *Order {
 	return &Order{Amount: amount, Status: "created"}
 }
 
+// IsValid проверяет корректность данных заказа.
+// Возвращает true, если сумма заказа неотрицательна.
 func (o *Order) IsValid() bool {
 	return o.Amount >= 0
 }
 
+// PaymentService предоставляет методы для работы с оплатами заказов.
 type PaymentService struct{}
 
+// NewPaymentService создает и возвращает новый экземпляр PaymentService.
 func NewPaymentService() *PaymentService {
 	return &PaymentService{}
 }
 
+// ProcessPayment обрабатывает оплату заказа.
+// Проверяет статус и валидность заказа, обновляет статус в соответствии с результатом.
+// Возвращает ошибку, если:
+// - заказ уже оплачен (status == "paid")
+// - заказ невалиден
+// В случае успешной обработки возвращает nil.
 func (ps *PaymentService) ProcessPayment(order *Order) error {
 	if order.Status == "paid" {
 		return errors.New("order is already paid")
@@ -42,6 +54,12 @@ func (ps *PaymentService) ProcessPayment(order *Order) error {
 	return nil
 }
 
+// CancelOrder отменяет заказ, если это возможно.
+// Проверяет текущий статус заказа перед отменой.
+// Возвращает ошибку, если:
+// - заказ уже оплачен (status == "paid")
+// - заказ уже отменен (status == "cancelled")
+// В случае успешной отмены возвращает nil и обновляет статус заказа на "cancelled".
 func (ps *PaymentService) CancelOrder(order *Order) error {
 	if order.Status == "paid" {
 		return errors.New("cannot cancel paid order")

@@ -3,7 +3,6 @@ package payment
 import "errors"
 
 // Order представляет заказ в системе оплаты.
-// Содержит информацию о сумме и текущем статусе.
 type Order struct {
 	Amount int    // Сумма заказа в минимальных единицах валюты
 	Status string // Текущий статус заказа
